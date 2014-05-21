@@ -1,19 +1,5 @@
-#! /app/bin/node
+#! /app/vendor/node/bin/node
 
-var request = require('request');
-var mongojs = require('mongojs');
-var db = mongojs('mongodb://nyassin:onesie@oceanic.mongohq.com:10020/onesie', ["submissions", "users"]);
-
-
-var Parse = require('node-parse-api').Parse;
-
-var APP_ID = "IZWcu8SYmxfJmOz0Ney00vbsrcjC7Ee5ZjrMW75v";
-
-var MASTER_KEY = "iOOdupP9QBIFmkxyPsdTpoqsTxi0KMoeFDRGmMQR";
-
-var app = new Parse(APP_ID, MASTER_KEY);
-
-// the class
 var Kaiseki = require('kaiseki');
 
 // instantiate
@@ -24,6 +10,7 @@ var kaiseki = new Kaiseki(APP_ID, REST_API_KEY);
 
 
 function AlertAllUsers() {
+	
 	// Fetch Today's Submission
 	var params = {
 	  where: { sent: Boolean(0) },
@@ -68,7 +55,6 @@ function AlertAllUsers() {
 		
 	});
 }
-
 function chooseUser() { 
 
 	kaiseki.getUsers(function(err, res, body, success) {
@@ -86,35 +72,96 @@ function chooseUser() {
 		    }
 		};
 
-		var pendingUser = {
-			User: user,
-			Submitted: Boolean(0)
-		}
 
-		kaiseki.createObject('Pending', pendingUser, function(err, res, body, success) {
-			console.log("object created = ", body);
-			if(success) {
-				kaiseki.sendPushNotification(notification, function(err, res, body, success) {
-				  if (success) {
-				    console.log('Push notification successfully sent:', body);
-				  } else {
-				    console.log('Could not send push notification:', err);
-				  }
-				});	
-			} else {
-    			console.log('Could not create Pending User:', err);
-			}
+		
+
+		kaiseki.getUser(user['objectId'], function(err, res, body, success) {
+  
+  	
+  			console.log('found object = ', body);
 			
-		})
+			var pendingUser = {
+				User: body,
+				Submitted: Boolean(0)
+			}
+
+			kaiseki.createObject('Pending', pendingUser, function(err, res, body, success) {
+				console.log("object created = ", body);
+				if(success) {
+					kaiseki.sendPushNotification(notification, function(err, res, body, success) {
+					  if (success) {
+					    console.log('Push notification successfully sent:', body);
+					  } else {
+					    console.log('Could not send push notification:', err);
+					  }
+					});	
+				} else {
+	    			console.log('Could not create Pending User:', err);
+				}
+				
+			})
+
+		});
+		
 	});
 
 	
+}
+
+function updateWinners() {
+
+
+	kaiseki.getObjects('Pending', function(err, res, body, success) {
+
+		body.forEach(function(winner) {
+
+			var now = new Date();
+			var notified = new Date(Date.parse(winner['createdAt']));
+			var hoursSince = Math.round((now - notified)/1000 / 60 / 60);
+
+			//Remove delinquent Users
+			if (hoursSince > 48) {
+				kaiseki.deleteObject('Pending', winner['objectId'], function(err, res, body, success) {
+				  if (success)
+				    console.log("deleted person who didn't respond in 48 hours");
+				  else
+				    console.log('failed to delete!');
+				});
+			} 
+
+			if (hoursSince > 24 && hoursSince < 48) {
+
+
+				//Remind Users
+				var token = winner['User']['deviceToken']
+
+		  		var channel = "token_" + token;
+			  	var notification = {
+				  	channels: [channel],
+				  	data: {
+					    alert: "24 hours have passed since you won the lottery. Don't forget to send in your submission before the 48 hour limit!"
+				    }
+				};
+
+				kaiseki.sendPushNotification(notification, function(err, res, body, success) {
+					  if (success) {
+					    console.log('Push notification successfully sent:', body);
+					  } else {
+					    console.log('Could not send push notification:', err);
+					  }
+				});	
+
+			}
+
+		})
+	});
 }
 
 
 
 chooseUser();
 AlertAllUsers();
+updateWinners();
 setTimeout(function() {
   console.log('Exiting.');
   process.exit(0);

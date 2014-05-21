@@ -2,8 +2,6 @@
 
 var request = require('request');
 var mongojs = require('mongojs');
-// var shared = require('./bin/shared_functions')
-var shared = require('./bin/shared_functions')
 var db = mongojs('mongodb://nyassin:onesie@oceanic.mongohq.com:10020/onesie', ["submissions", "users"]);
 
 

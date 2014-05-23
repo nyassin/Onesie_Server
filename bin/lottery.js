@@ -81,8 +81,8 @@ function chooseUser() {
   			console.log('found object = ', body);
 			
 			var pendingUser = {
-				User: body,
-				Submitted: Boolean(0)
+				userID: body['username'],
+				submitted: Boolean(0)
 			}
 
 			kaiseki.createObject('Pending', pendingUser, function(err, res, body, success) {

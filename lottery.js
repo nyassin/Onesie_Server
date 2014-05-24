@@ -133,7 +133,7 @@ exports.updateWinners = function (req, res) {
 
 
 				//Remind Users
-				var token = winner['User']['deviceToken']
+				var token = winner['deviceToken']
 
 		  		var channel = "token_" + token;
 			  	var notification = {

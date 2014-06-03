@@ -33,7 +33,7 @@ exports.AlertAllUsers = function(req, res) {
 		var notification = {
 		  	channels: ["user"],
 		  	data: {
-			    alert: "Today's Onesie: " + submission['title']
+			    alert: "It's 5 PM! Today's Onesie: " + submission['title'] + ". See the image on Onesie!"
 		    }
 		};
 
@@ -68,7 +68,7 @@ exports.chooseUser = function (req, res) {
 	  	var notification = {
 		  	channels: [channel],
 		  	data: {
-			    alert: "You have won the lottery!"
+			    alert: "You have won the lottery! This is your lucky day. You have 48 hours to send an image and a caption to everyone on Onesie! Go to the Submit section and write something!"
 		    }
 		};
 
@@ -139,7 +139,7 @@ exports.updateWinners = function (req, res) {
 			  	var notification = {
 				  	channels: [channel],
 				  	data: {
-					    alert: "24 hours have passed since you won the lottery. Don't forget to send in your submission before the 48 hour limit!"
+					    alert: "24 hours have passed since you won the lottery. Don't forget to send in your submission before the 48 hour limit! Go to the Submit section to submit your story!"
 				    }
 				};
 

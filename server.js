@@ -6,7 +6,7 @@ var app = express.createServer();
 // app.get('/', function(res, req){
 // 	req.send("IM AWAKE!!")
 // })
-app.get('/', lottery.AlertAllUsers)
+app.get('/', lottery.chooseUser)
 var port = process.env.PORT || 3000;
 app.listen(port, function() {
   console.log("Listening on " + port);	
